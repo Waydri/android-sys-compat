@@ -1,0 +1,8 @@
+[package]
+name = "libdbus-sys"
+version = "0.2.7"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+libc = { workspace = true }
