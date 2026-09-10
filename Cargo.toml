@@ -1,0 +1,19 @@
+[workspace]
+members = [
+    "libudev-sys",
+    "drm-sys",
+    "libinput-sys",
+    "libseat-sys",
+    "gbm-sys",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/YOUR_USERNAME/android-sys-compat"
+
+[workspace.dependencies]
+libc = "0.2"
+libloading = "0.8"
+bindgen = "0.69"
