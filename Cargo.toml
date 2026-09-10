@@ -1,17 +1,20 @@
 [workspace]
 members = [
     "libudev-sys",
-    "drm-sys",
     "libinput-sys",
     "libseat-sys",
     "gbm-sys",
+    "drm-sys",
+    "libxkbcommon-sys",
+    "wayland-sys",
+    "libdisplay-info-sys",
+    "libei-sys",
 ]
 resolver = "2"
 
 [workspace.package]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/YOUR_USERNAME/android-sys-compat"
 
 [workspace.dependencies]
 libc = "0.2"
