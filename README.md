@@ -20,6 +20,7 @@ aren't in the NDK. Each crate here replaces one of them.
 - `libinput-sys`
 - `libseat-sys`
 - `gbm-sys`
+- `and more...`
 
 ## Usage
 
