@@ -26,4 +26,4 @@ aren't in the NDK. Each crate here replaces one of them.
 
 ```toml
 [patch.crates-io]
-libudev-sys = { git = "https://github.com/YOUR_USERNAME/android-sys-compat", branch = "main" }
+libudev-sys = { git = "https://github.com/YOUR_USERNAME/android-sys-compat", branch = "android" }
