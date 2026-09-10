@@ -9,6 +9,7 @@ members = [
     "wayland-sys",
     "libdisplay-info-sys",
     "libei-sys",
+    "libdbus-sys",
 ]
 resolver = "2"
 
