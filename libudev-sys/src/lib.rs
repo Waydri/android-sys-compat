@@ -1,110 +1,74 @@
-use libc::{c_char, c_int, c_void};
-use libloading::Library;
-use std::sync::OnceLock;
+#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 
-type UdevNewFn = unsafe extern "C" fn() -> *mut c_void;
-type UdevUnrefFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
-type UdevEnumerateNewFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
-type UdevEnumerateAddMatchSubsystemFn = unsafe extern "C" fn(*mut c_void, *const c_char) -> c_int;
-type UdevEnumerateScanDevicesFn = unsafe extern "C" fn(*mut c_void) -> c_int;
-type UdevEnumerateGetListEntryFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
-type UdevEnumerateUnrefFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
-type UdevDeviceNewFromSyspathFn = unsafe extern "C" fn(*mut c_void, *const c_char) -> *mut c_void;
-type UdevDeviceGetDevnodeFn = unsafe extern "C" fn(*mut c_void) -> *const c_char;
-type UdevDeviceUnrefFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
+use libc::{c_char, c_int, c_void, dev_t};
 
-struct UdevLib {
-    udev_new: UdevNewFn,
-    udev_unref: UdevUnrefFn,
-    udev_enumerate_new: UdevEnumerateNewFn,
-    udev_enumerate_add_match_subsystem: UdevEnumerateAddMatchSubsystemFn,
-    udev_enumerate_scan_devices: UdevEnumerateScanDevicesFn,
-    udev_enumerate_get_list_entry: UdevEnumerateGetListEntryFn,
-    udev_enumerate_unref: UdevEnumerateUnrefFn,
-    udev_device_new_from_syspath: UdevDeviceNewFromSyspathFn,
-    udev_device_get_devnode: UdevDeviceGetDevnodeFn,
-    udev_device_unref: UdevDeviceUnrefFn,
-}
+pub type udev = c_void;
+pub type udev_device = c_void;
+pub type udev_enumerate = c_void;
+pub type udev_list_entry = c_void;
+pub type udev_monitor = c_void;
+pub type udev_queue = c_void;
+pub type udev_hwdb = c_void;
 
-static UDEV: OnceLock<Option<UdevLib>> = OnceLock::new();
+#[no_mangle] pub unsafe extern "C" fn udev_new() -> *mut udev { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_unref(_: *mut udev) -> *mut udev { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_ref(_: *mut udev) -> *mut udev { std::ptr::null_mut() }
 
-fn load() -> Option<&'static UdevLib> {
-    UDEV.get_or_init(|| {
-        let lib = unsafe {
-            Library::new("libudev.so.1")
-                .or_else(|_| Library::new("libudev.so"))
-                .ok()?
-        };
-        let lib: &'static Library = Box::leak(Box::new(lib));
-        Some(unsafe {
-            UdevLib {
-                udev_new: *lib.get(b"udev_new").ok()?,
-                udev_unref: *lib.get(b"udev_unref").ok()?,
-                udev_enumerate_new: *lib.get(b"udev_enumerate_new").ok()?,
-                udev_enumerate_add_match_subsystem: *lib.get(b"udev_enumerate_add_match_subsystem").ok()?,
-                udev_enumerate_scan_devices: *lib.get(b"udev_enumerate_scan_devices").ok()?,
-                udev_enumerate_get_list_entry: *lib.get(b"udev_enumerate_get_list_entry").ok()?,
-                udev_enumerate_unref: *lib.get(b"udev_enumerate_unref").ok()?,
-                udev_device_new_from_syspath: *lib.get(b"udev_device_new_from_syspath").ok()?,
-                udev_device_get_devnode: *lib.get(b"udev_device_get_devnode").ok()?,
-                udev_device_unref: *lib.get(b"udev_device_unref").ok()?,
-            }
-        })
-    }).as_ref()
-}
+#[no_mangle] pub unsafe extern "C" fn udev_device_new_from_syspath(_: *mut udev, _: *const c_char) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_new_from_devnum(_: *mut udev, _: c_char, _: dev_t) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_new_from_subsystem_sysname(_: *mut udev, _: *const c_char, _: *const c_char) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_new_from_device_id(_: *mut udev, _: *const c_char) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_unref(_: *mut udev_device) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_ref(_: *mut udev_device) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_parent(_: *mut udev_device) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_parent_with_subsystem_devtype(_: *mut udev_device, _: *const c_char, _: *const c_char) -> *mut udev_device { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_devnode(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_is_initialized(_: *mut udev_device) -> c_int { 0 }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_devnum(_: *mut udev_device) -> dev_t { 0 }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_devpath(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_devtype(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_subsystem(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_syspath(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_sysname(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_sysnum(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_driver(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_action(_: *mut udev_device) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_seqnum(_: *mut udev_device) -> u64 { 0 }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_property_value(_: *mut udev_device, _: *const c_char) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_sysattr_value(_: *mut udev_device, _: *const c_char) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_set_sysattr_value(_: *mut udev_device, _: *const c_char, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_properties_list_entry(_: *mut udev_device) -> *mut udev_list_entry { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_device_get_sysattr_list_entry(_: *mut udev_device) -> *mut udev_list_entry { std::ptr::null_mut() }
 
-#[no_mangle]
-pub unsafe extern "C" fn udev_new() -> *mut c_void {
-    load().map(|l| (l.udev_new)()).unwrap_or(std::ptr::null_mut())
-}
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_new(_: *mut udev) -> *mut udev_enumerate { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_unref(_: *mut udev_enumerate) -> *mut udev_enumerate { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_ref(_: *mut udev_enumerate) -> *mut udev_enumerate { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_subsystem(_: *mut udev_enumerate, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_is_initialized(_: *mut udev_enumerate) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_sysattr(_: *mut udev_enumerate, _: *const c_char, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_sysname(_: *mut udev_enumerate, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_property(_: *mut udev_enumerate, _: *const c_char, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_tag(_: *mut udev_enumerate, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_match_parent(_: *mut udev_enumerate, _: *mut udev_device) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_nomatch_subsystem(_: *mut udev_enumerate, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_nomatch_sysattr(_: *mut udev_enumerate, _: *const c_char, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_add_syspath(_: *mut udev_enumerate, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_scan_devices(_: *mut udev_enumerate) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_scan_subsystems(_: *mut udev_enumerate) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_enumerate_get_list_entry(_: *mut udev_enumerate) -> *mut udev_list_entry { std::ptr::null_mut() }
 
-#[no_mangle]
-pub unsafe extern "C" fn udev_unref(udev: *mut c_void) -> *mut c_void {
-    load().map(|l| (l.udev_unref)(udev)).unwrap_or(std::ptr::null_mut())
-}
+#[no_mangle] pub unsafe extern "C" fn udev_list_entry_get_next(_: *mut udev_list_entry) -> *mut udev_list_entry { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_list_entry_get_by_name(_: *mut udev_list_entry, _: *const c_char) -> *mut udev_list_entry { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_list_entry_get_name(_: *mut udev_list_entry) -> *const c_char { std::ptr::null() }
+#[no_mangle] pub unsafe extern "C" fn udev_list_entry_get_value(_: *mut udev_list_entry) -> *const c_char { std::ptr::null() }
 
-#[no_mangle]
-pub unsafe extern "C" fn udev_enumerate_new(udev: *mut c_void) -> *mut c_void {
-    load().map(|l| (l.udev_enumerate_new)(udev)).unwrap_or(std::ptr::null_mut())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_enumerate_add_match_subsystem(
-    enumerate: *mut c_void,
-    subsystem: *const c_char,
-) -> c_int {
-    load().map(|l| (l.udev_enumerate_add_match_subsystem)(enumerate, subsystem)).unwrap_or(-1)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_enumerate_scan_devices(enumerate: *mut c_void) -> c_int {
-    load().map(|l| (l.udev_enumerate_scan_devices)(enumerate)).unwrap_or(-1)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_enumerate_get_list_entry(enumerate: *mut c_void) -> *mut c_void {
-    load().map(|l| (l.udev_enumerate_get_list_entry)(enumerate)).unwrap_or(std::ptr::null_mut())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_enumerate_unref(enumerate: *mut c_void) -> *mut c_void {
-    load().map(|l| (l.udev_enumerate_unref)(enumerate)).unwrap_or(std::ptr::null_mut())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_device_new_from_syspath(
-    udev: *mut c_void,
-    syspath: *const c_char,
-) -> *mut c_void {
-    load().map(|l| (l.udev_device_new_from_syspath)(udev, syspath)).unwrap_or(std::ptr::null_mut())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_device_get_devnode(device: *mut c_void) -> *const c_char {
-    load().map(|l| (l.udev_device_get_devnode)(device)).unwrap_or(std::ptr::null())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn udev_device_unref(device: *mut c_void) -> *mut c_void {
-    load().map(|l| (l.udev_device_unref)(device)).unwrap_or(std::ptr::null_mut())
-}
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_new_from_netlink(_: *mut udev, _: *const c_char) -> *mut udev_monitor { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_unref(_: *mut udev_monitor) -> *mut udev_monitor { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_ref(_: *mut udev_monitor) -> *mut udev_monitor { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_filter_add_match_subsystem_devtype(_: *mut udev_monitor, _: *const c_char, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_filter_add_match_tag(_: *mut udev_monitor, _: *const c_char) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_filter_remove(_: *mut udev_monitor) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_enable_receiving(_: *mut udev_monitor) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_set_receive_buffer_size(_: *mut udev_monitor, _: c_int) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_get_fd(_: *mut udev_monitor) -> c_int { -1 }
+#[no_mangle] pub unsafe extern "C" fn udev_monitor_receive_device(_: *mut udev_monitor) -> *mut udev_device { std::ptr::null_mut() }
