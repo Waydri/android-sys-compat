@@ -1,0 +1,9 @@
+[package]
+name = "wayland-sys"
+version = "0.29.5"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+libc = { workspace = true }
+libloading = { workspace = true }
