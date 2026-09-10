@@ -5,11 +5,35 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
+    let contents = "#include <drm.h>\n#include <drm_mode.h>\n";
+
     let mut builder = bindgen::Builder::default()
-        .header_contents("wrapper.h", "#include <drm.h>\n#include <drm_mode.h>")
-        .clang_arg("-I/usr/include/libdrm")
+        .header_contents("bindings.h", contents)
+        .ctypes_prefix("libc")
+        .prepend_enum_name(false)
+        .layout_tests(false)
+        .generate_comments(false)
+        .derive_copy(true)
+        .derive_debug(true)
+        .derive_default(true)
+        .derive_hash(true)
+        .derive_eq(true)
+        .allowlist_recursively(true)
+        .blocklist_type("drm_control_DRM_ADD_COMMAND")
         .allowlist_type("DRM_.*|drm_.*")
-        .allowlist_var("DRM_.*|drm_.*");
+        .allowlist_var("DRM_.*|drm_.*")
+        .constified_enum_module("drm_control_.*")
+        .constified_enum_module("drm_buf_desc_.*")
+        .constified_enum_module("drm_map_type")
+        .constified_enum_module("drm_map_flags")
+        .constified_enum_module("drm_stat_type")
+        .constified_enum_module("drm_lock_flags")
+        .constified_enum_module("drm_dma_flags")
+        .constified_enum_module("drm_ctx_flags")
+        .constified_enum_module("drm_drawable_info_type_t")
+        .constified_enum_module("drm_vblank_seq_type")
+        .constified_enum_module("drm_mode_subconnector")
+        .clang_arg("-I/usr/include/libdrm");
 
     if target_os == "android" {
         let clang_target = match target_arch.as_str() {
