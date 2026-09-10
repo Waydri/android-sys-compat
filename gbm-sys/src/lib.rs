@@ -16,7 +16,6 @@ type GbmCreateSurfaceFn =
 type GbmSurfaceDestroyFn = unsafe extern "C" fn(*mut gbm_surface);
 
 struct GbmLib {
-    _lib: Library,
     gbm_create_device: GbmCreateDeviceFn,
     gbm_device_destroy: GbmDeviceDestroyFn,
     gbm_bo_create: GbmCreateBufferObjectFn,

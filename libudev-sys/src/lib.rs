@@ -14,7 +14,6 @@ type UdevDeviceGetDevnodeFn = unsafe extern "C" fn(*mut c_void) -> *const c_char
 type UdevDeviceUnrefFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
 
 struct UdevLib {
-    _lib: Library,
     udev_new: UdevNewFn,
     udev_unref: UdevUnrefFn,
     udev_enumerate_new: UdevEnumerateNewFn,

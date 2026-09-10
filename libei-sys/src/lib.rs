@@ -14,7 +14,6 @@ type EiEventFn = unsafe extern "C" fn(*mut ei, *mut c_void) -> *mut ei_event;
 type EiEventUnrefFn = unsafe extern "C" fn(*mut ei_event);
 
 struct EiLib {
-    _lib: Library,
     ei_new: EiNewFn,
     ei_unref: EiUnrefFn,
     ei_setup_backend_socket: EiSetupBackendFn,

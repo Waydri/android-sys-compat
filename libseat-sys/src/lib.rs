@@ -15,7 +15,6 @@ type SeatCloseDeviceFn = unsafe extern "C" fn(*mut seat, c_int) -> c_int;
 type SeatDispatchFn = unsafe extern "C" fn(*mut seat, c_int) -> c_int;
 
 struct SeatLib {
-    _lib: Library,
     libseat_open_seat: SeatOpenSeatFn,
     libseat_close_seat: SeatCloseSeatFn,
     libseat_open_device: SeatOpenDeviceFn,

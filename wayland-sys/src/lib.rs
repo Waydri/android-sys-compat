@@ -16,7 +16,6 @@ type ProxyMarshalFlagsFn =
 type ProxyDestroyFn = unsafe extern "C" fn(*mut wl_proxy);
 
 struct WaylandLib {
-    _lib: Library,
     wl_display_connect: DisplayConnectFn,
     wl_display_disconnect: DisplayDisconnectFn,
     wl_display_dispatch: DisplayDispatchFn,

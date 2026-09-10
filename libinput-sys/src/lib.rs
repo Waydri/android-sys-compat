@@ -15,7 +15,6 @@ type LibinputSuspendFn = unsafe extern "C" fn(*mut libinput) -> c_int;
 type LibinputResumeFn = unsafe extern "C" fn(*mut libinput) -> c_int;
 
 struct LibinputLib {
-    _lib: Library,
     libinput_path_create_context: LibinputPathCreateContextFn,
     libinput_udev_create_context: LibinputUdevCreateContextFn,
     libinput_unref: LibinputUnrefFn,

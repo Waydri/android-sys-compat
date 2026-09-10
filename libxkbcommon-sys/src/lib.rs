@@ -20,7 +20,6 @@ type StateUpdateMaskFn = unsafe extern "C" fn(*mut xkb_state, u32, u32, u32, u32
 type StateKeyGetOneSymFn = unsafe extern "C" fn(*mut xkb_state, u32) -> u32;
 
 struct XkbLib {
-    _lib: Library,
     xkb_context_new: ContextNewFn,
     xkb_context_unref: ContextUnrefFn,
     xkb_keymap_new_from_names: KeymapNewFromNamesFn,

@@ -10,7 +10,6 @@ type InfoGetMakeFn = unsafe extern "C" fn(*const di_info) -> *const c_void;
 type InfoGetModelFn = unsafe extern "C" fn(*const di_info) -> *const c_void;
 
 struct DiLib {
-    _lib: Library,
     di_info_parse_edid: InfoParseFn,
     di_info_destroy: InfoDestroyFn,
     di_info_get_make: InfoGetMakeFn,
