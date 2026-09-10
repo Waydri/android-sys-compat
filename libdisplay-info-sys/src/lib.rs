@@ -1,5 +1,5 @@
 use libc::{c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type di_info = c_void;
@@ -11,10 +11,10 @@ type InfoGetModelFn = unsafe extern "C" fn(*const di_info) -> *const c_void;
 
 struct DiLib {
     _lib: Library,
-    di_info_parse_edid: Symbol<'static, InfoParseFn>,
-    di_info_destroy: Symbol<'static, InfoDestroyFn>,
-    di_info_get_make: Symbol<'static, InfoGetMakeFn>,
-    di_info_get_model: Symbol<'static, InfoGetModelFn>,
+    di_info_parse_edid: InfoParseFn,
+    di_info_destroy: InfoDestroyFn,
+    di_info_get_make: InfoGetMakeFn,
+    di_info_get_model: InfoGetModelFn,
 }
 
 static LIB: OnceLock<Option<DiLib>> = OnceLock::new();
@@ -27,13 +27,13 @@ fn load() -> Option<&'static DiLib> {
                 .or_else(|_| Library::new("libdisplay-info.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             DiLib {
-                di_info_parse_edid: lib.get(b"di_info_parse_edid").ok()?,
-                di_info_destroy: lib.get(b"di_info_destroy").ok()?,
-                di_info_get_make: lib.get(b"di_info_get_make").ok()?,
-                di_info_get_model: lib.get(b"di_info_get_model").ok()?,
-                _lib: lib,
+                di_info_parse_edid: *lib.get(b"di_info_parse_edid").ok()?,
+                di_info_destroy: *lib.get(b"di_info_destroy").ok()?,
+                di_info_get_make: *lib.get(b"di_info_get_make").ok()?,
+                di_info_get_model: *lib.get(b"di_info_get_model").ok()?,
             }
         })
     }).as_ref()

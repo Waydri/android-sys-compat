@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type ei = c_void;
@@ -15,12 +15,12 @@ type EiEventUnrefFn = unsafe extern "C" fn(*mut ei_event);
 
 struct EiLib {
     _lib: Library,
-    ei_new: Symbol<'static, EiNewFn>,
-    ei_unref: Symbol<'static, EiUnrefFn>,
-    ei_setup_backend_socket: Symbol<'static, EiSetupBackendFn>,
-    ei_dispatch: Symbol<'static, EiDispatchFn>,
-    ei_event: Symbol<'static, EiEventFn>,
-    ei_event_unref: Symbol<'static, EiEventUnrefFn>,
+    ei_new: EiNewFn,
+    ei_unref: EiUnrefFn,
+    ei_setup_backend_socket: EiSetupBackendFn,
+    ei_dispatch: EiDispatchFn,
+    ei_event: EiEventFn,
+    ei_event_unref: EiEventUnrefFn,
 }
 
 static LIB: OnceLock<Option<EiLib>> = OnceLock::new();
@@ -32,15 +32,15 @@ fn load() -> Option<&'static EiLib> {
                 .or_else(|_| Library::new("libei.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             EiLib {
-                ei_new: lib.get(b"ei_new").ok()?,
-                ei_unref: lib.get(b"ei_unref").ok()?,
-                ei_setup_backend_socket: lib.get(b"ei_setup_backend_socket").ok()?,
-                ei_dispatch: lib.get(b"ei_dispatch").ok()?,
-                ei_event: lib.get(b"ei_event").ok()?,
-                ei_event_unref: lib.get(b"ei_event_unref").ok()?,
-                _lib: lib,
+                ei_new: *lib.get(b"ei_new").ok()?,
+                ei_unref: *lib.get(b"ei_unref").ok()?,
+                ei_setup_backend_socket: *lib.get(b"ei_setup_backend_socket").ok()?,
+                ei_dispatch: *lib.get(b"ei_dispatch").ok()?,
+                ei_event: *lib.get(b"ei_event").ok()?,
+                ei_event_unref: *lib.get(b"ei_event_unref").ok()?,
             }
         })
     }).as_ref()

@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 type UdevNewFn = unsafe extern "C" fn() -> *mut c_void;
@@ -15,16 +15,16 @@ type UdevDeviceUnrefFn = unsafe extern "C" fn(*mut c_void) -> *mut c_void;
 
 struct UdevLib {
     _lib: Library,
-    udev_new: Symbol<'static, UdevNewFn>,
-    udev_unref: Symbol<'static, UdevUnrefFn>,
-    udev_enumerate_new: Symbol<'static, UdevEnumerateNewFn>,
-    udev_enumerate_add_match_subsystem: Symbol<'static, UdevEnumerateAddMatchSubsystemFn>,
-    udev_enumerate_scan_devices: Symbol<'static, UdevEnumerateScanDevicesFn>,
-    udev_enumerate_get_list_entry: Symbol<'static, UdevEnumerateGetListEntryFn>,
-    udev_enumerate_unref: Symbol<'static, UdevEnumerateUnrefFn>,
-    udev_device_new_from_syspath: Symbol<'static, UdevDeviceNewFromSyspathFn>,
-    udev_device_get_devnode: Symbol<'static, UdevDeviceGetDevnodeFn>,
-    udev_device_unref: Symbol<'static, UdevDeviceUnrefFn>,
+    udev_new: UdevNewFn,
+    udev_unref: UdevUnrefFn,
+    udev_enumerate_new: UdevEnumerateNewFn,
+    udev_enumerate_add_match_subsystem: UdevEnumerateAddMatchSubsystemFn,
+    udev_enumerate_scan_devices: UdevEnumerateScanDevicesFn,
+    udev_enumerate_get_list_entry: UdevEnumerateGetListEntryFn,
+    udev_enumerate_unref: UdevEnumerateUnrefFn,
+    udev_device_new_from_syspath: UdevDeviceNewFromSyspathFn,
+    udev_device_get_devnode: UdevDeviceGetDevnodeFn,
+    udev_device_unref: UdevDeviceUnrefFn,
 }
 
 static UDEV: OnceLock<Option<UdevLib>> = OnceLock::new();
@@ -36,19 +36,19 @@ fn load() -> Option<&'static UdevLib> {
                 .or_else(|_| Library::new("libudev.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             UdevLib {
-                udev_new: lib.get(b"udev_new").ok()?,
-                udev_unref: lib.get(b"udev_unref").ok()?,
-                udev_enumerate_new: lib.get(b"udev_enumerate_new").ok()?,
-                udev_enumerate_add_match_subsystem: lib.get(b"udev_enumerate_add_match_subsystem").ok()?,
-                udev_enumerate_scan_devices: lib.get(b"udev_enumerate_scan_devices").ok()?,
-                udev_enumerate_get_list_entry: lib.get(b"udev_enumerate_get_list_entry").ok()?,
-                udev_enumerate_unref: lib.get(b"udev_enumerate_unref").ok()?,
-                udev_device_new_from_syspath: lib.get(b"udev_device_new_from_syspath").ok()?,
-                udev_device_get_devnode: lib.get(b"udev_device_get_devnode").ok()?,
-                udev_device_unref: lib.get(b"udev_device_unref").ok()?,
-                _lib: lib,
+                udev_new: *lib.get(b"udev_new").ok()?,
+                udev_unref: *lib.get(b"udev_unref").ok()?,
+                udev_enumerate_new: *lib.get(b"udev_enumerate_new").ok()?,
+                udev_enumerate_add_match_subsystem: *lib.get(b"udev_enumerate_add_match_subsystem").ok()?,
+                udev_enumerate_scan_devices: *lib.get(b"udev_enumerate_scan_devices").ok()?,
+                udev_enumerate_get_list_entry: *lib.get(b"udev_enumerate_get_list_entry").ok()?,
+                udev_enumerate_unref: *lib.get(b"udev_enumerate_unref").ok()?,
+                udev_device_new_from_syspath: *lib.get(b"udev_device_new_from_syspath").ok()?,
+                udev_device_get_devnode: *lib.get(b"udev_device_get_devnode").ok()?,
+                udev_device_unref: *lib.get(b"udev_device_unref").ok()?,
             }
         })
     }).as_ref()

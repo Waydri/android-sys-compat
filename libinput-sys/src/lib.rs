@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type libinput = c_void;
@@ -16,13 +16,13 @@ type LibinputResumeFn = unsafe extern "C" fn(*mut libinput) -> c_int;
 
 struct LibinputLib {
     _lib: Library,
-    libinput_path_create_context: Symbol<'static, LibinputPathCreateContextFn>,
-    libinput_udev_create_context: Symbol<'static, LibinputUdevCreateContextFn>,
-    libinput_unref: Symbol<'static, LibinputUnrefFn>,
+    libinput_path_create_context: LibinputPathCreateContextFn,
+    libinput_udev_create_context: LibinputUdevCreateContextFn,
+    libinput_unref: LibinputUnrefFn,
     libinput_get_fd: Symbol<'static, unsafe extern "C" fn(*mut libinput) -> c_int>,
-    libinput_dispatch: Symbol<'static, LibinputDispatchFn>,
-    libinput_suspend: Symbol<'static, LibinputSuspendFn>,
-    libinput_resume: Symbol<'static, LibinputResumeFn>,
+    libinput_dispatch: LibinputDispatchFn,
+    libinput_suspend: LibinputSuspendFn,
+    libinput_resume: LibinputResumeFn,
 }
 
 static LIB: OnceLock<Option<LibinputLib>> = OnceLock::new();
@@ -34,16 +34,16 @@ fn load() -> Option<&'static LibinputLib> {
                 .or_else(|_| Library::new("libinput.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             LibinputLib {
-                libinput_path_create_context: lib.get(b"libinput_path_create_context").ok()?,
-                libinput_udev_create_context: lib.get(b"libinput_udev_create_context").ok()?,
-                libinput_unref: lib.get(b"libinput_unref").ok()?,
-                libinput_get_fd: lib.get(b"libinput_get_fd").ok()?,
-                libinput_dispatch: lib.get(b"libinput_dispatch").ok()?,
-                libinput_suspend: lib.get(b"libinput_suspend").ok()?,
-                libinput_resume: lib.get(b"libinput_resume").ok()?,
-                _lib: lib,
+                libinput_path_create_context: *lib.get(b"libinput_path_create_context").ok()?,
+                libinput_udev_create_context: *lib.get(b"libinput_udev_create_context").ok()?,
+                libinput_unref: *lib.get(b"libinput_unref").ok()?,
+                libinput_get_fd: *lib.get(b"libinput_get_fd").ok()?,
+                libinput_dispatch: *lib.get(b"libinput_dispatch").ok()?,
+                libinput_suspend: *lib.get(b"libinput_suspend").ok()?,
+                libinput_resume: *lib.get(b"libinput_resume").ok()?,
             }
         })
     }).as_ref()

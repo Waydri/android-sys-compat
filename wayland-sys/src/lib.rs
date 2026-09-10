@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type wl_display = c_void;
@@ -17,13 +17,13 @@ type ProxyDestroyFn = unsafe extern "C" fn(*mut wl_proxy);
 
 struct WaylandLib {
     _lib: Library,
-    wl_display_connect: Symbol<'static, DisplayConnectFn>,
-    wl_display_disconnect: Symbol<'static, DisplayDisconnectFn>,
-    wl_display_dispatch: Symbol<'static, DisplayDispatchFn>,
-    wl_display_flush: Symbol<'static, DisplayFlushFn>,
-    wl_display_roundtrip: Symbol<'static, DisplayRoundtripFn>,
-    wl_proxy_marshal_flags: Symbol<'static, ProxyMarshalFlagsFn>,
-    wl_proxy_destroy: Symbol<'static, ProxyDestroyFn>,
+    wl_display_connect: DisplayConnectFn,
+    wl_display_disconnect: DisplayDisconnectFn,
+    wl_display_dispatch: DisplayDispatchFn,
+    wl_display_flush: DisplayFlushFn,
+    wl_display_roundtrip: DisplayRoundtripFn,
+    wl_proxy_marshal_flags: ProxyMarshalFlagsFn,
+    wl_proxy_destroy: ProxyDestroyFn,
 }
 
 static LIB: OnceLock<Option<WaylandLib>> = OnceLock::new();
@@ -35,16 +35,16 @@ fn load() -> Option<&'static WaylandLib> {
                 .or_else(|_| Library::new("libwayland-client.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             WaylandLib {
-                wl_display_connect: lib.get(b"wl_display_connect").ok()?,
-                wl_display_disconnect: lib.get(b"wl_display_disconnect").ok()?,
-                wl_display_dispatch: lib.get(b"wl_display_dispatch").ok()?,
-                wl_display_flush: lib.get(b"wl_display_flush").ok()?,
-                wl_display_roundtrip: lib.get(b"wl_display_roundtrip").ok()?,
-                wl_proxy_marshal_flags: lib.get(b"wl_proxy_marshal_flags").ok()?,
-                wl_proxy_destroy: lib.get(b"wl_proxy_destroy").ok()?,
-                _lib: lib,
+                wl_display_connect: *lib.get(b"wl_display_connect").ok()?,
+                wl_display_disconnect: *lib.get(b"wl_display_disconnect").ok()?,
+                wl_display_dispatch: *lib.get(b"wl_display_dispatch").ok()?,
+                wl_display_flush: *lib.get(b"wl_display_flush").ok()?,
+                wl_display_roundtrip: *lib.get(b"wl_display_roundtrip").ok()?,
+                wl_proxy_marshal_flags: *lib.get(b"wl_proxy_marshal_flags").ok()?,
+                wl_proxy_destroy: *lib.get(b"wl_proxy_destroy").ok()?,
             }
         })
     }).as_ref()

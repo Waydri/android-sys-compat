@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type seat = c_void;
@@ -16,11 +16,11 @@ type SeatDispatchFn = unsafe extern "C" fn(*mut seat, c_int) -> c_int;
 
 struct SeatLib {
     _lib: Library,
-    libseat_open_seat: Symbol<'static, SeatOpenSeatFn>,
-    libseat_close_seat: Symbol<'static, SeatCloseSeatFn>,
-    libseat_open_device: Symbol<'static, SeatOpenDeviceFn>,
-    libseat_close_device: Symbol<'static, SeatCloseDeviceFn>,
-    libseat_dispatch: Symbol<'static, SeatDispatchFn>,
+    libseat_open_seat: SeatOpenSeatFn,
+    libseat_close_seat: SeatCloseSeatFn,
+    libseat_open_device: SeatOpenDeviceFn,
+    libseat_close_device: SeatCloseDeviceFn,
+    libseat_dispatch: SeatDispatchFn,
 }
 
 static LIB: OnceLock<Option<SeatLib>> = OnceLock::new();
@@ -32,14 +32,14 @@ fn load() -> Option<&'static SeatLib> {
                 .or_else(|_| Library::new("libseat.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             SeatLib {
-                libseat_open_seat: lib.get(b"libseat_open_seat").ok()?,
-                libseat_close_seat: lib.get(b"libseat_close_seat").ok()?,
-                libseat_open_device: lib.get(b"libseat_open_device").ok()?,
-                libseat_close_device: lib.get(b"libseat_close_device").ok()?,
-                libseat_dispatch: lib.get(b"libseat_dispatch").ok()?,
-                _lib: lib,
+                libseat_open_seat: *lib.get(b"libseat_open_seat").ok()?,
+                libseat_close_seat: *lib.get(b"libseat_close_seat").ok()?,
+                libseat_open_device: *lib.get(b"libseat_open_device").ok()?,
+                libseat_close_device: *lib.get(b"libseat_close_device").ok()?,
+                libseat_dispatch: *lib.get(b"libseat_dispatch").ok()?,
             }
         })
     }).as_ref()

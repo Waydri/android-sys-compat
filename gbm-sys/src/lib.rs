@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type gbm_device = c_void;
@@ -17,12 +17,12 @@ type GbmSurfaceDestroyFn = unsafe extern "C" fn(*mut gbm_surface);
 
 struct GbmLib {
     _lib: Library,
-    gbm_create_device: Symbol<'static, GbmCreateDeviceFn>,
-    gbm_device_destroy: Symbol<'static, GbmDeviceDestroyFn>,
-    gbm_bo_create: Symbol<'static, GbmCreateBufferObjectFn>,
-    gbm_bo_destroy: Symbol<'static, GbmBoDestroyFn>,
-    gbm_surface_create: Symbol<'static, GbmCreateSurfaceFn>,
-    gbm_surface_destroy: Symbol<'static, GbmSurfaceDestroyFn>,
+    gbm_create_device: GbmCreateDeviceFn,
+    gbm_device_destroy: GbmDeviceDestroyFn,
+    gbm_bo_create: GbmCreateBufferObjectFn,
+    gbm_bo_destroy: GbmBoDestroyFn,
+    gbm_surface_create: GbmCreateSurfaceFn,
+    gbm_surface_destroy: GbmSurfaceDestroyFn,
 }
 
 static LIB: OnceLock<Option<GbmLib>> = OnceLock::new();
@@ -34,15 +34,15 @@ fn load() -> Option<&'static GbmLib> {
                 .or_else(|_| Library::new("libgbm.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             GbmLib {
-                gbm_create_device: lib.get(b"gbm_create_device").ok()?,
-                gbm_device_destroy: lib.get(b"gbm_device_destroy").ok()?,
-                gbm_bo_create: lib.get(b"gbm_bo_create").ok()?,
-                gbm_bo_destroy: lib.get(b"gbm_bo_destroy").ok()?,
-                gbm_surface_create: lib.get(b"gbm_surface_create").ok()?,
-                gbm_surface_destroy: lib.get(b"gbm_surface_destroy").ok()?,
-                _lib: lib,
+                gbm_create_device: *lib.get(b"gbm_create_device").ok()?,
+                gbm_device_destroy: *lib.get(b"gbm_device_destroy").ok()?,
+                gbm_bo_create: *lib.get(b"gbm_bo_create").ok()?,
+                gbm_bo_destroy: *lib.get(b"gbm_bo_destroy").ok()?,
+                gbm_surface_create: *lib.get(b"gbm_surface_create").ok()?,
+                gbm_surface_destroy: *lib.get(b"gbm_surface_destroy").ok()?,
             }
         })
     }).as_ref()

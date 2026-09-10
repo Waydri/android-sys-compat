@@ -1,5 +1,5 @@
 use libc::{c_char, c_int, c_void};
-use libloading::{Library, Symbol};
+use libloading::Library;
 use std::sync::OnceLock;
 
 pub type xkb_context = c_void;
@@ -21,15 +21,15 @@ type StateKeyGetOneSymFn = unsafe extern "C" fn(*mut xkb_state, u32) -> u32;
 
 struct XkbLib {
     _lib: Library,
-    xkb_context_new: Symbol<'static, ContextNewFn>,
-    xkb_context_unref: Symbol<'static, ContextUnrefFn>,
-    xkb_keymap_new_from_names: Symbol<'static, KeymapNewFromNamesFn>,
-    xkb_keymap_new_from_string: Symbol<'static, KeymapNewFromStringFn>,
-    xkb_keymap_unref: Symbol<'static, KeymapUnrefFn>,
-    xkb_state_new: Symbol<'static, StateNewFn>,
-    xkb_state_unref: Symbol<'static, StateUnrefFn>,
-    xkb_state_update_mask: Symbol<'static, StateUpdateMaskFn>,
-    xkb_state_key_get_one_sym: Symbol<'static, StateKeyGetOneSymFn>,
+    xkb_context_new: ContextNewFn,
+    xkb_context_unref: ContextUnrefFn,
+    xkb_keymap_new_from_names: KeymapNewFromNamesFn,
+    xkb_keymap_new_from_string: KeymapNewFromStringFn,
+    xkb_keymap_unref: KeymapUnrefFn,
+    xkb_state_new: StateNewFn,
+    xkb_state_unref: StateUnrefFn,
+    xkb_state_update_mask: StateUpdateMaskFn,
+    xkb_state_key_get_one_sym: StateKeyGetOneSymFn,
 }
 
 static LIB: OnceLock<Option<XkbLib>> = OnceLock::new();
@@ -41,18 +41,18 @@ fn load() -> Option<&'static XkbLib> {
                 .or_else(|_| Library::new("libxkbcommon.so"))
                 .ok()?
         };
+        let lib: &'static Library = Box::leak(Box::new(lib));
         Some(unsafe {
             XkbLib {
-                xkb_context_new: lib.get(b"xkb_context_new").ok()?,
-                xkb_context_unref: lib.get(b"xkb_context_unref").ok()?,
-                xkb_keymap_new_from_names: lib.get(b"xkb_keymap_new_from_names").ok()?,
-                xkb_keymap_new_from_string: lib.get(b"xkb_keymap_new_from_string").ok()?,
-                xkb_keymap_unref: lib.get(b"xkb_keymap_unref").ok()?,
-                xkb_state_new: lib.get(b"xkb_state_new").ok()?,
-                xkb_state_unref: lib.get(b"xkb_state_unref").ok()?,
-                xkb_state_update_mask: lib.get(b"xkb_state_update_mask").ok()?,
-                xkb_state_key_get_one_sym: lib.get(b"xkb_state_key_get_one_sym").ok()?,
-                _lib: lib,
+                xkb_context_new: *lib.get(b"xkb_context_new").ok()?,
+                xkb_context_unref: *lib.get(b"xkb_context_unref").ok()?,
+                xkb_keymap_new_from_names: *lib.get(b"xkb_keymap_new_from_names").ok()?,
+                xkb_keymap_new_from_string: *lib.get(b"xkb_keymap_new_from_string").ok()?,
+                xkb_keymap_unref: *lib.get(b"xkb_keymap_unref").ok()?,
+                xkb_state_new: *lib.get(b"xkb_state_new").ok()?,
+                xkb_state_unref: *lib.get(b"xkb_state_unref").ok()?,
+                xkb_state_update_mask: *lib.get(b"xkb_state_update_mask").ok()?,
+                xkb_state_key_get_one_sym: *lib.get(b"xkb_state_key_get_one_sym").ok()?,
             }
         })
     }).as_ref()
