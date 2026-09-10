@@ -1,0 +1,11 @@
+[package]
+name = "drm-sys"
+version = "0.1.2"
+edition.workspace = true
+license.workspace = true
+
+[build-dependencies]
+bindgen = { workspace = true }
+
+[dependencies]
+libc = { workspace = true }
