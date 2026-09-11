@@ -1,14 +1,42 @@
 use std::env;
 use std::path::PathBuf;
 
+const HEADER: &str = r#"
+#include <drm.h>
+#include <drm_mode.h>
+
+const unsigned int __BINDGEN_TMP_DRM_MODE_PROP_SIGNED_RANGE = DRM_MODE_PROP_SIGNED_RANGE;
+#undef DRM_MODE_PROP_SIGNED_RANGE
+const unsigned int DRM_MODE_PROP_SIGNED_RANGE = __BINDGEN_TMP_DRM_MODE_PROP_SIGNED_RANGE;
+#define DRM_MODE_PROP_SIGNED_RANGE DRM_MODE_PROP_SIGNED_RANGE
+
+const unsigned int __BINDGEN_TMP_DRM_MODE_PROP_OBJECT = DRM_MODE_PROP_OBJECT;
+#undef DRM_MODE_PROP_OBJECT
+const unsigned int DRM_MODE_PROP_OBJECT = __BINDGEN_TMP_DRM_MODE_PROP_OBJECT;
+#define DRM_MODE_PROP_OBJECT DRM_MODE_PROP_OBJECT
+
+const unsigned int __BINDGEN_TMP_DRM_PLANE_TYPE_OVERLAY = DRM_PLANE_TYPE_OVERLAY;
+#undef DRM_PLANE_TYPE_OVERLAY
+const unsigned int DRM_PLANE_TYPE_OVERLAY = __BINDGEN_TMP_DRM_PLANE_TYPE_OVERLAY;
+#define DRM_PLANE_TYPE_OVERLAY DRM_PLANE_TYPE_OVERLAY
+
+const unsigned int __BINDGEN_TMP_DRM_PLANE_TYPE_PRIMARY = DRM_PLANE_TYPE_PRIMARY;
+#undef DRM_PLANE_TYPE_PRIMARY
+const unsigned int DRM_PLANE_TYPE_PRIMARY = __BINDGEN_TMP_DRM_PLANE_TYPE_PRIMARY;
+#define DRM_PLANE_TYPE_PRIMARY DRM_PLANE_TYPE_PRIMARY
+
+const unsigned int __BINDGEN_TMP_DRM_PLANE_TYPE_CURSOR = DRM_PLANE_TYPE_CURSOR;
+#undef DRM_PLANE_TYPE_CURSOR
+const unsigned int DRM_PLANE_TYPE_CURSOR = __BINDGEN_TMP_DRM_PLANE_TYPE_CURSOR;
+#define DRM_PLANE_TYPE_CURSOR DRM_PLANE_TYPE_CURSOR
+"#;
+
 fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
     let target_arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_default();
 
-    let contents = "#include <drm.h>\n#include <drm_mode.h>\n";
-
     let mut builder = bindgen::Builder::default()
-        .header_contents("bindings.h", contents)
+        .header_contents("bindings.h", HEADER)
         .ctypes_prefix("libc")
         .prepend_enum_name(false)
         .layout_tests(false)
@@ -19,6 +47,7 @@ fn main() {
         .derive_hash(true)
         .derive_eq(true)
         .allowlist_recursively(true)
+        .blocklist_type("_BINDGEN_TMP_.*")
         .blocklist_type("drm_control_DRM_ADD_COMMAND")
         .allowlist_type("DRM_.*|drm_.*")
         .allowlist_var("DRM_.*|drm_.*")
@@ -44,16 +73,13 @@ fn main() {
             other => panic!("Unsupported Android arch: {}", other),
         };
 
-        let ndk_home = env::var("ANDROID_NDK_HOME")
-            .expect("ANDROID_NDK_HOME must be set");
-
+        let ndk_home = env::var("ANDROID_NDK_HOME").expect("ANDROID_NDK_HOME must be set");
         let sysroot = PathBuf::from(&ndk_home)
             .join("toolchains")
             .join("llvm")
             .join("prebuilt")
             .join("linux-x86_64")
             .join("sysroot");
-
         let arch_include = sysroot.join("usr").join("include").join(clang_target);
 
         builder = builder
@@ -66,7 +92,6 @@ fn main() {
     }
 
     let bindings = builder.generate().expect("Unable to generate drm bindings");
-
     let out = PathBuf::from(env::var("OUT_DIR").unwrap());
     bindings.write_to_file(out.join("bindings.rs")).unwrap();
 }
