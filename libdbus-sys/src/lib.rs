@@ -8,6 +8,47 @@ pub type dbus_uint32_t = c_uint;
 pub type dbus_int64_t = i64;
 pub type dbus_uint64_t = u64;
 
+pub mod DBusBusType {
+    use libc::c_uint;
+    pub type Type = c_uint;
+    pub const Session: Type = 0;
+    pub const System: Type = 1;
+    pub const Starter: Type = 2;
+}
+
+pub mod DBusRequestNameReply {
+    use libc::c_uint;
+    pub type Type = c_uint;
+    pub const PrimaryOwner: Type = 1;
+    pub const InQueue: Type = 2;
+    pub const Exists: Type = 3;
+    pub const AlreadyOwner: Type = 4;
+}
+
+pub mod DBusReleaseNameReply {
+    use libc::c_uint;
+    pub type Type = c_uint;
+    pub const Released: Type = 1;
+    pub const NonExistent: Type = 2;
+    pub const NotOwner: Type = 3;
+}
+
+pub mod DBusHandlerResult {
+    use libc::c_uint;
+    pub type Type = c_uint;
+    pub const Handled: Type = 0;
+    pub const NotYetHandled: Type = 1;
+    pub const NeedMemory: Type = 2;
+}
+
+pub mod DBusDispatchStatus {
+    use libc::c_uint;
+    pub type Type = c_uint;
+    pub const DataRemains: Type = 0;
+    pub const Complete: Type = 1;
+    pub const NeedMemory: Type = 2;
+}
+
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct DBusError {
@@ -41,7 +82,7 @@ pub struct DBusMessageIter {
 pub struct DBusObjectPathVTable {
     pub unregister_function: Option<unsafe extern "C" fn(*mut DBusConnection, *mut c_void)>,
     pub message_function: Option<
-        unsafe extern "C" fn(*mut DBusConnection, *mut DBusMessage, *mut c_void) -> DBusHandlerResult,
+        unsafe extern "C" fn(*mut DBusConnection, *mut DBusMessage, *mut c_void) -> c_uint,
     >,
     pub dbus_internal_pad1: Option<unsafe extern "C" fn(*mut c_void)>,
     pub dbus_internal_pad2: Option<unsafe extern "C" fn(*mut c_void)>,
@@ -54,47 +95,6 @@ pub type DBusMessage = c_void;
 pub type DBusPendingCall = c_void;
 pub type DBusWatch = c_void;
 pub type DBusTimeout = c_void;
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DBusBusType {
-    Session = 0,
-    System = 1,
-    Starter = 2,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DBusRequestNameReply {
-    PrimaryOwner = 1,
-    InQueue = 2,
-    Exists = 3,
-    AlreadyOwner = 4,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DBusReleaseNameReply {
-    Released = 1,
-    NonExistent = 2,
-    NotOwner = 3,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DBusHandlerResult {
-    Handled = 0,
-    NotYetHandled = 1,
-    NeedMemory = 2,
-}
-
-#[repr(C)]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DBusDispatchStatus {
-    DataRemains = 0,
-    Complete = 1,
-    NeedMemory = 2,
-}
 
 pub const DBUS_BUS_SESSION: c_int = 0;
 pub const DBUS_BUS_SYSTEM: c_int = 1;
@@ -158,8 +158,8 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_set_error(_e: *mut DBusError, _n: *const c_char, _m: *const c_char) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_set_error_from_message(_e: *mut DBusError, _m: *mut DBusMessage) -> dbus_bool_t { 0 }
 
-#[no_mangle] pub unsafe extern "C" fn dbus_bus_get(_t: DBusBusType, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
-#[no_mangle] pub unsafe extern "C" fn dbus_bus_get_private(_t: DBusBusType, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn dbus_bus_get(_t: DBusBusType::Type, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn dbus_bus_get_private(_t: DBusBusType::Type, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
 #[no_mangle] pub unsafe extern "C" fn dbus_bus_get_unique_name(_c: *mut DBusConnection) -> *const c_char { std::ptr::null() }
 #[no_mangle] pub unsafe extern "C" fn dbus_bus_register(_c: *mut DBusConnection, _e: *mut DBusError) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_bus_request_name(_c: *mut DBusConnection, _n: *const c_char, _f: c_uint, _e: *mut DBusError) -> c_int { -1 }
@@ -173,8 +173,8 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_flush(_c: *mut DBusConnection) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_read_write(_c: *mut DBusConnection, _t: c_int) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_read_write_dispatch(_c: *mut DBusConnection, _t: c_int) -> dbus_bool_t { 0 }
-#[no_mangle] pub unsafe extern "C" fn dbus_connection_get_dispatch_status(_c: *mut DBusConnection) -> DBusDispatchStatus { DBusDispatchStatus::Complete }
-#[no_mangle] pub unsafe extern "C" fn dbus_connection_dispatch(_c: *mut DBusConnection) -> DBusHandlerResult { DBusHandlerResult::NotYetHandled }
+#[no_mangle] pub unsafe extern "C" fn dbus_connection_get_dispatch_status(_c: *mut DBusConnection) -> DBusDispatchStatus::Type { DBusDispatchStatus::Complete }
+#[no_mangle] pub unsafe extern "C" fn dbus_connection_dispatch(_c: *mut DBusConnection) -> DBusHandlerResult::Type { DBusHandlerResult::NotYetHandled }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_get_is_connected(_c: *mut DBusConnection) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_set_exit_on_disconnect(_c: *mut DBusConnection, _b: dbus_bool_t) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_pop_message(_c: *mut DBusConnection) -> *mut DBusMessage { std::ptr::null_mut() }
@@ -185,7 +185,7 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_has_messages_to_send(_c: *mut DBusConnection) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_add_filter(
     _c: *mut DBusConnection,
-    _f: Option<unsafe extern "C" fn(*mut DBusConnection, *mut DBusMessage, *mut c_void) -> DBusHandlerResult>,
+    _f: Option<unsafe extern "C" fn(*mut DBusConnection, *mut DBusMessage, *mut c_void) -> c_uint>,
     _u: *mut c_void,
     _fr: Option<unsafe extern "C" fn(*mut c_void)>,
 ) -> dbus_bool_t { 0 }
