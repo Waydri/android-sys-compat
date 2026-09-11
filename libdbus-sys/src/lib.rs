@@ -14,16 +14,7 @@ pub struct DBusError {
     pub name: *const c_char,
     pub message: *const c_char,
     pub dummy: c_uint,
-    pub padding1: *mut c_void,
-    pub dummy6: c_int,
-    pub padding2: *mut c_void,
-    pub padding3: *mut c_void,
-    pub padding4: *mut c_void,
-    pub padding5: *mut c_void,
-    pub padding6: *mut c_void,
-    pub padding7: *mut c_void,
-    pub padding8: *mut c_void,
-    pub padding9: *mut c_void,
+    pub padding1: *const c_void,
 }
 
 #[repr(C)]
@@ -167,8 +158,8 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_set_error(_e: *mut DBusError, _n: *const c_char, _m: *const c_char) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_set_error_from_message(_e: *mut DBusError, _m: *mut DBusMessage) -> dbus_bool_t { 0 }
 
-#[no_mangle] pub unsafe extern "C" fn dbus_bus_get(_t: c_int, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
-#[no_mangle] pub unsafe extern "C" fn dbus_bus_get_private(_t: c_int, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn dbus_bus_get(_t: DBusBusType, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
+#[no_mangle] pub unsafe extern "C" fn dbus_bus_get_private(_t: DBusBusType, _e: *mut DBusError) -> *mut DBusConnection { std::ptr::null_mut() }
 #[no_mangle] pub unsafe extern "C" fn dbus_bus_get_unique_name(_c: *mut DBusConnection) -> *const c_char { std::ptr::null() }
 #[no_mangle] pub unsafe extern "C" fn dbus_bus_register(_c: *mut DBusConnection, _e: *mut DBusError) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_bus_request_name(_c: *mut DBusConnection, _n: *const c_char, _f: c_uint, _e: *mut DBusError) -> c_int { -1 }
@@ -182,8 +173,8 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_flush(_c: *mut DBusConnection) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_read_write(_c: *mut DBusConnection, _t: c_int) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_read_write_dispatch(_c: *mut DBusConnection, _t: c_int) -> dbus_bool_t { 0 }
-#[no_mangle] pub unsafe extern "C" fn dbus_connection_get_dispatch_status(_c: *mut DBusConnection) -> c_int { DBUS_DISPATCH_COMPLETE }
-#[no_mangle] pub unsafe extern "C" fn dbus_connection_dispatch(_c: *mut DBusConnection) -> c_int { DBUS_HANDLER_RESULT_NOT_YET_HANDLED }
+#[no_mangle] pub unsafe extern "C" fn dbus_connection_get_dispatch_status(_c: *mut DBusConnection) -> DBusDispatchStatus { DBusDispatchStatus::Complete }
+#[no_mangle] pub unsafe extern "C" fn dbus_connection_dispatch(_c: *mut DBusConnection) -> DBusHandlerResult { DBusHandlerResult::NotYetHandled }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_get_is_connected(_c: *mut DBusConnection) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_set_exit_on_disconnect(_c: *mut DBusConnection, _b: dbus_bool_t) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_pop_message(_c: *mut DBusConnection) -> *mut DBusMessage { std::ptr::null_mut() }
@@ -206,7 +197,7 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_connection_set_watch_functions(
     _c: *mut DBusConnection,
     _add: Option<unsafe extern "C" fn(*mut DBusWatch, *mut c_void) -> dbus_bool_t>,
-    _remove: Option<unsafe extern "C" fn(*mut DBusWatch, *mut c_void) -> dbus_bool_t>,
+    _remove: Option<unsafe extern "C" fn(*mut DBusWatch, *mut c_void)>,
     _toggled: Option<unsafe extern "C" fn(*mut DBusWatch, *mut c_void)>,
     _u: *mut c_void, _fr: Option<unsafe extern "C" fn(*mut c_void)>,
 ) -> dbus_bool_t { 0 }
@@ -226,12 +217,12 @@ pub const DBUS_WATCH_HANGUP: c_uint = 8;
 #[no_mangle] pub unsafe extern "C" fn dbus_message_set_sender(_m: *mut DBusMessage, _s: *const c_char) -> dbus_bool_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_message_get_destination(_m: *mut DBusMessage) -> *const c_char { std::ptr::null() }
 #[no_mangle] pub unsafe extern "C" fn dbus_message_set_destination(_m: *mut DBusMessage, _d: *const c_char) -> dbus_bool_t { 0 }
-#[no_mangle] pub unsafe extern "C" fn dbus_message_set_path(_m: *mut DBusMessage, _p: *const c_char) -> dbus_bool_t { 0 }
+#[no_mangle] pub unsafe extern "C" fn dbus_message_set_path(_m: *mut DBusMessage, _p: *const c_char) -> bool { false }
 #[no_mangle] pub unsafe extern "C" fn dbus_message_get_signature(_m: *mut DBusMessage, _c: dbus_bool_t) -> *const c_char { std::ptr::null() }
 #[no_mangle] pub unsafe extern "C" fn dbus_message_get_no_reply(_m: *mut DBusMessage) -> dbus_bool_t { 1 }
-#[no_mangle] pub unsafe extern "C" fn dbus_message_set_no_reply(_m: *mut DBusMessage, _b: dbus_bool_t) -> dbus_bool_t { 0 }
+#[no_mangle] pub unsafe extern "C" fn dbus_message_set_no_reply(_m: *mut DBusMessage, _b: dbus_bool_t) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_message_get_auto_start(_m: *mut DBusMessage) -> dbus_bool_t { 0 }
-#[no_mangle] pub unsafe extern "C" fn dbus_message_set_auto_start(_m: *mut DBusMessage, _b: dbus_bool_t) -> dbus_bool_t { 0 }
+#[no_mangle] pub unsafe extern "C" fn dbus_message_set_auto_start(_m: *mut DBusMessage, _b: dbus_bool_t) {}
 #[no_mangle] pub unsafe extern "C" fn dbus_message_get_serial(_m: *mut DBusMessage) -> dbus_uint32_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_message_get_reply_serial(_m: *mut DBusMessage) -> dbus_uint32_t { 0 }
 #[no_mangle] pub unsafe extern "C" fn dbus_message_set_serial(_m: *mut DBusMessage, _s: dbus_uint32_t) -> dbus_bool_t { 0 }
