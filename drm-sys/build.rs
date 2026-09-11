@@ -5,30 +5,20 @@ const HEADER: &str = r#"
 #include <drm.h>
 #include <drm_mode.h>
 
-const unsigned int __BINDGEN_TMP_DRM_MODE_PROP_SIGNED_RANGE = DRM_MODE_PROP_SIGNED_RANGE;
 #undef DRM_MODE_PROP_SIGNED_RANGE
-const unsigned int DRM_MODE_PROP_SIGNED_RANGE = __BINDGEN_TMP_DRM_MODE_PROP_SIGNED_RANGE;
-#define DRM_MODE_PROP_SIGNED_RANGE DRM_MODE_PROP_SIGNED_RANGE
+const unsigned int DRM_MODE_PROP_SIGNED_RANGE = (1 << 6);
 
-const unsigned int __BINDGEN_TMP_DRM_MODE_PROP_OBJECT = DRM_MODE_PROP_OBJECT;
 #undef DRM_MODE_PROP_OBJECT
-const unsigned int DRM_MODE_PROP_OBJECT = __BINDGEN_TMP_DRM_MODE_PROP_OBJECT;
-#define DRM_MODE_PROP_OBJECT DRM_MODE_PROP_OBJECT
+const unsigned int DRM_MODE_PROP_OBJECT = (1 << 8);
 
-const unsigned int __BINDGEN_TMP_DRM_PLANE_TYPE_OVERLAY = DRM_PLANE_TYPE_OVERLAY;
 #undef DRM_PLANE_TYPE_OVERLAY
-const unsigned int DRM_PLANE_TYPE_OVERLAY = __BINDGEN_TMP_DRM_PLANE_TYPE_OVERLAY;
-#define DRM_PLANE_TYPE_OVERLAY DRM_PLANE_TYPE_OVERLAY
+const unsigned int DRM_PLANE_TYPE_OVERLAY = 0;
 
-const unsigned int __BINDGEN_TMP_DRM_PLANE_TYPE_PRIMARY = DRM_PLANE_TYPE_PRIMARY;
 #undef DRM_PLANE_TYPE_PRIMARY
-const unsigned int DRM_PLANE_TYPE_PRIMARY = __BINDGEN_TMP_DRM_PLANE_TYPE_PRIMARY;
-#define DRM_PLANE_TYPE_PRIMARY DRM_PLANE_TYPE_PRIMARY
+const unsigned int DRM_PLANE_TYPE_PRIMARY = 1;
 
-const unsigned int __BINDGEN_TMP_DRM_PLANE_TYPE_CURSOR = DRM_PLANE_TYPE_CURSOR;
 #undef DRM_PLANE_TYPE_CURSOR
-const unsigned int DRM_PLANE_TYPE_CURSOR = __BINDGEN_TMP_DRM_PLANE_TYPE_CURSOR;
-#define DRM_PLANE_TYPE_CURSOR DRM_PLANE_TYPE_CURSOR
+const unsigned int DRM_PLANE_TYPE_CURSOR = 2;
 "#;
 
 fn main() {
@@ -47,7 +37,6 @@ fn main() {
         .derive_hash(true)
         .derive_eq(true)
         .allowlist_recursively(true)
-        .blocklist_type("_BINDGEN_TMP_.*")
         .blocklist_type("drm_control_DRM_ADD_COMMAND")
         .allowlist_type("DRM_.*|drm_.*")
         .allowlist_var("DRM_.*|drm_.*")
